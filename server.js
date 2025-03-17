@@ -3,7 +3,13 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
-import os from 'os'; // Importar para obtener la IP local
+import os from 'os';
+
+import appointmentRoutes from './routes/appointmentRoutes.js';
+import programRoutes from './routes/programRoutes.js';
+import medicamentRoutes from './routes/medicamentRoutes.js';
+import resultRoutes from './routes/resultRoutes.js';
+import patientRoutes from './routes/patientRoutes.js';
 
 dotenv.config();
 connectDB(); // Conectar a MongoDB
@@ -15,6 +21,11 @@ app.use(cors()); // Habilita CORS
 
 // Definir rutas
 app.use('/api/auth', authRoutes);
+app.use('/api/patient', patientRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/programs', programRoutes);
+app.use('/api/medicaments', medicamentRoutes);
+app.use('/api/results', resultRoutes);
 
 const PORT = process.env.PORT || 5000;
 
