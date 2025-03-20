@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const resultSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
   fechaRealizacion: String,
   examen: String,
   estado: String,
