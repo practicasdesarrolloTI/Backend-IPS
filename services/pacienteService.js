@@ -3,27 +3,82 @@ import { generarToken, desencriptarRespuesta } from "../utils/jwtHelper.js";
 
 
 const IDENTIFICATIONS = [
-  { common: "Cédula de Extranjería", short: "CE", codes: [2] },
-  { common: "Tarjeta de Identidad", short: "TI", codes: [5] },
-  { common: "Cédula de Ciudadanía", short: "CC", codes: [1, 3] },
-  { common: "Registro Civil", short: "RC", codes: [4] },
-  { common: "Pasaporte", short: "PA", codes: [3] },
-  { common: "Menor Sin Identificación", short: "MSI", codes: [7] },
-  { common: "Adulto Sin Identificación", short: "ASI", codes: [6] },
-  { common: "Cédula Diplomática", short: "CD", codes: [9] },
-  { common: "Salvoconducto", short: "SC", codes: [11] },
-  { common: "Permiso Especial de Permanencia", short: "PEP", codes: [13] },
-  { common: "Permiso Temporal de Permanencia", short: "PTP", codes: [14] },
+  { 
+    common: "Cédula de Extranjería", 
+    short: "CE", 
+    codes: { nuevaeps: 1, aliansalud: "CE", foneca: null } 
+  },
+  { 
+    common: "Tarjeta de Identidad", 
+    short: "TI", 
+    codes: { nuevaeps: 2, aliansalud: "TI", foneca: "TI" } 
+  },
+  { 
+    common: "Cédula de Ciudadanía", 
+    short: "CC", 
+    codes: { nuevaeps: 3, aliansalud: "CC", foneca: "CC" } 
+  },
+  { 
+    common: "Registro Civil", 
+    short: "RC", 
+    codes: { nuevaeps: 5, aliansalud: "RC", foneca: "RC" } 
+  },
+  { 
+    common: "Pasaporte", 
+    short: "PA", 
+    codes: { nuevaeps: 4, aliansalud: "PA", foneca: null } 
+  },
+  { 
+    common: "Menor Sin Identificación", 
+    short: "MSI", 
+    codes: { nuevaeps: 6, aliansalud: null, foneca: null } 
+  },
+  { 
+    common: "Adulto Sin Identificación", 
+    short: "ASI", 
+    codes: { nuevaeps: 7, aliansalud: null, foneca: null } 
+  },
+  { 
+    common: "Cédula Diplomática", 
+    short: "CD", 
+    codes: { nuevaeps: 8, aliansalud: "CD", foneca: null } 
+  },
+  { 
+    common: "Salvoconducto", 
+    short: "SC", 
+    codes: { nuevaeps: 10, aliansalud: "SC", foneca: null } 
+  },
+  { 
+    common: "Permiso Especial de Permanencia", 
+    short: "PEP", 
+    codes: { nuevaeps: 11, aliansalud: "PE", foneca: null } 
+  },
+  { 
+    common: "Permiso Temporal de Permanencia", 
+    short: "PTP", 
+    codes: { nuevaeps: 15, aliansalud: "PT", foneca: null } 
+  },
 ];
 
-function homologarTipoDocumento(tipoCodigo) {
-  const tipoNum = Number(tipoCodigo);
-  const found = IDENTIFICATIONS.find(item => item.codes.includes(tipoNum));
+
+
+export function homologarTipoDocumentoPorEPS(tipoCodigo, eps) {
+  const epsKey = eps.toLowerCase().replace(/\s+/g, "");
+  
+  const found = IDENTIFICATIONS.find(item => item.codes[epsKey] === tipoCodigo || item.codes[epsKey] === Number(tipoCodigo));
+
+  if (!found) {
+    return { error: "Tipo de documento no encontrado para esa EPS" };
+  }
+
   return {
-    tipo_abreviado: found ? found.short : String(tipoCodigo),
-    tipo_nombre: found ? found.common : "Tipo desconocido",
+    tipo_abreviado: found.short,
+    tipo_nombre: found.common,
+    homologado: found.codes[epsKey],
   };
 }
+
+
 
 function buildHeaders(documento) {
   const token = generarToken(documento);
@@ -58,7 +113,7 @@ export async function getBasicData(documento) {
 
   // Homologar tipo_documento si existe
   if (desencriptado && desencriptado.tipo_documento !== undefined) {
-    const homologado = homologarTipoDocumento(desencriptado.tipo_documento);
+    const homologado = homologarTipoDocumentoPorEPS(desencriptado.tipo_documento, desencriptado.eps);
     desencriptado.tipo_documento_abreviado = homologado.tipo_abreviado;
   }
 
