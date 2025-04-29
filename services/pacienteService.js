@@ -80,13 +80,30 @@ export function homologarTipoDocumentoPorEPS(tipoCodigo, eps) {
 
 
 
-function buildHeaders(documento) {
+// function buildHeaders(documento) {
+//   const token = generarToken(documento);
+//   return {
+//     authorization: "Bearer " + process.env.AUTH_BASE_POBLACIONAL,
+//     data: token,
+//   };
+// }
+
+function buildHeadersDocumento(documento) {
   const token = generarToken(documento);
   return {
     authorization: "Bearer " + process.env.AUTH_BASE_POBLACIONAL,
     data: token,
   };
 }
+
+function buildHeadersCodigoIPS(codigo_ips) {
+  const token = generarToken({ codigo_ips: Number(codigo_ips) });
+  return {
+    authorization: "Bearer " + process.env.AUTH_BASE_POBLACIONAL,
+    data: token,
+  };
+}
+
 
 // export async function getBasicData(documento) {
 
@@ -103,7 +120,7 @@ function buildHeaders(documento) {
 export async function getBasicData(documento) {
   const res = await fetch(`${process.env.URL_BASE_POBLACIONAL}/api/v1/getBasicData`, {
     method: "GET",
-    headers: buildHeaders(documento),
+    headers: buildHeadersDocumento(documento),
   });
 
   if (!res.ok) throw new Error("getBasicData failed: " + res.status);
@@ -121,21 +138,23 @@ export async function getBasicData(documento) {
 }
 
 
-export async function getMaestra(documento) {
+// 🚀 Para obtener la MAESTRA (usa CODIGO_IPS)
+export async function getMaestra(codigo_ips) {
   const res = await fetch(`${process.env.URL_BASE_POBLACIONAL}/api/v1/maestra`, {
     method: "GET",
-    headers: buildHeaders(documento),
+    headers: buildHeadersCodigoIPS(codigo_ips),
   });
 
   if (!res.ok) throw new Error("getMaestra failed: " + res.status);
   const data = await res.json();
   return desencriptarRespuesta(data.data);
-} 
+}
 
-export async function getMaestraFull(documento) {
+// 🚀 Para obtener la MAESTRA FULL (usa CODIGO_IPS)
+export async function getMaestraFull(codigo_ips) {
   const res = await fetch(`${process.env.URL_BASE_POBLACIONAL}/api/v1/maestra/full`, {
     method: "GET",
-    headers: buildHeaders(documento),
+    headers: buildHeadersCodigoIPS(codigo_ips),
   });
 
   if (!res.ok) throw new Error("getMaestraFull failed: " + res.status);
@@ -143,16 +162,16 @@ export async function getMaestraFull(documento) {
   return desencriptarRespuesta(data.data);
 }
 
-// export async function getBienestar(documento) {
-//   const res = await fetch(`${process.env.URL_BASE_POBLACIONAL}/api/v1/bienestar`, {
-//     method: "GET",
-//     headers: buildHeaders(documento),
-//   });
+export async function getBienestar(codigo_ips) {
+  const res = await fetch(`${process.env.URL_BASE_POBLACIONAL}/api/v1/bienestar`, {
+    method: "GET",
+    headers: buildHeadersCodigoIPS(codigo_ips),
+  });
 
-//   if (!res.ok) throw new Error("getBienestar failed: " + res.status);
-//   const data = await res.json();
-//   return desencriptarRespuesta(data.data);
-// } //No sirve, sin autorización
+  if (!res.ok) throw new Error("getBienestar failed: " + res.status);
+  const data = await res.json();
+  return desencriptarRespuesta(data.data);
+} //No sirve, sin autorización
 
 export async function getHealth() {
   const res = await fetch(`${process.env.URL_BASE_POBLACIONAL}/api/v1/health`);
